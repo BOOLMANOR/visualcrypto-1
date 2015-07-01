@@ -1,58 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Visual Cryptography</title>
+    <title>Visual Cryptography</title>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.9/processing.min.js"></script>
 
 	<script type="application/processing" data-processing-target="pjs">
 
-// Global variables
-float radius = 50.0;
-int X, Y;
-int nX, nY;
-int delay = 16;
+	/* @pjs preload="https://cloud.githubusercontent.com/assets/13047840/8465622/c014db0a-205c-11e5-92ec-02b0e4163730.png,https://cloud.githubusercontent.com/assets/13047840/8465636/d0f24d86-205c-11e5-988a-fe99d07bb663.png"; */
 
-// Setup the Processing Canvas
-void setup(){
-  size( 200, 200 );
-  strokeWeight( 10 );
-  frameRate( 15 );
-  X = width / 2;
-  Y = width / 2;
-  nX = X;
-  nY = Y;  
-}
+	PImage pic1;
+	PImage pic2;
 
-// Main draw loop
-void draw(){
-  
-  radius = radius + sin( frameCount / 4 );
-  
-  // Track circle to new destination
-  X+=(nX-X)/delay;
-  Y+=(nY-Y)/delay;
-  
-  // Fill canvas grey
-  background( 100 );
-  
-  // Set fill-color to blue
-  fill( 0, 121, 184 );
-  
-  // Set stroke-color white
-  stroke(255); 
-  
-  // Draw circle
-  ellipse( X, Y, radius, radius );                  
-}
+	void setup() {
+		size(1200, 1200, P2D);
 
+		pic1=loadImage("https://cloud.githubusercontent.com/assets/13047840/8465622/c014db0a-205c-11e5-92ec-02b0e4163730.png");
+		pic2=loadImage("https://cloud.githubusercontent.com/assets/13047840/8465636/d0f24d86-205c-11e5-988a-fe99d07bb663.png");
+	}
 
-// Set circle's next destination
-void mouseMoved(){
-  nX = mouseX;
-  nY = mouseY;  
-}
+	void draw() {
+		background(255);
 
+		image(pic1, 100, 100);
+		image(pic2, mouseX, mouseY);
+	}
 	</script>
 </head>
 
