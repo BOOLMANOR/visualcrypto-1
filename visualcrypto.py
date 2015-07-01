@@ -7,7 +7,7 @@ reveal1name = 'in-reveal1.png'
 reveal2name = 'in-reveal2.png'
 hiddenname = 'in-hidden.png'
 if not (os.path.isfile(reveal1name) and os.path.isfile(reveal2name) and os.path.isfile(hiddenname)):
-    raise ValueError("Image does not exist")
+    raise ValueError('Image does not exist')
 
 # Load images in grayscale mode
 reveal1 = cv2.imread(reveal1name, cv2.IMREAD_GRAYSCALE)
@@ -16,7 +16,7 @@ hidden = cv2.imread(hiddenname, cv2.IMREAD_GRAYSCALE)
 
 # Check all images have equal size
 if not (reveal1.shape == reveal2.shape == hidden.shape):
-    raise ValueError("Images should have equal size")
+    raise ValueError('Images should have equal size')
 height, width = reveal1.shape
 
 # Convert grayscale images to binary
@@ -98,10 +98,74 @@ for x in range(0, height):
 # Create an image that would show what the hidden image will be look like
 cv2.bitwise_and(reveal1big, reveal2big, hiddenbig)
 
-# Place reveal1 and reveal2 adjacent to each other
-reveal12big = np.concatenate((reveal1big, reveal2big), axis = 1)
-
+# Save all images
 cv2.imwrite('out-reveal1big.png', reveal1big)
 cv2.imwrite('out-reveal2big.png', reveal2big)
-cv2.imwrite('out-reveal12big.png', reveal12big)
 cv2.imwrite('out-hiddenbig.png', hiddenbig)
+
+# Create a demo with Processing.js: since .blend() doesn't work correctly,
+# create transparent versions of both images and show them on white background
+trans1big = np.empty((height2, width2, 4), np.uint8)
+trans2big = np.empty((height2, width2, 4), np.uint8)
+
+# OpenCV doesn't support grayscale .png with transparency, so convert grayscale .png to RGBA
+# with white pixels corresponding to transparent
+for i in range(0, 3):
+    trans1big[:, :, i] = reveal1big
+    trans2big[:, :, i] = reveal2big
+trans1big[:, :, 3] = 255 - reveal1big
+trans2big[:, :, 3] = 255 - reveal2big
+
+# Save transparent images to use them in .html file
+cv2.imwrite('out-trans1.png', trans1big)
+cv2.imwrite('out-trans2.png', trans2big)
+
+# Position of the left-upper corner of the first image on the display window
+imagex = 200
+imagey = 100
+
+# Size of the display window in the demo
+sizeheight = max(3 * height2, imagey + height2)
+sizewidth = max(3 * width2, imagex + width2)
+
+# Load Processing.js, then load both images on white background
+htmltext = '''\
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visual Cryptography</title>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/processing.js/1.4.9/processing.min.js"></script>
+
+	<script type="application/processing" data-processing-target="pjs">
+
+	/* @pjs preload="out-trans1.png,out-trans2.png"; */
+
+	PImage pic1;
+	PImage pic2;
+
+	void setup() {
+		size(''' + str(sizewidth) + ', ' + str(sizeheight) + ''', P2D);
+
+		pic1=loadImage("out-trans1.png");
+		pic2=loadImage("out-trans2.png");
+	}
+
+	void draw() {
+		background(255);
+
+		image(pic1, ''' + str(imagex) + ', ' + str(imagey) + ''');
+		image(pic2, mouseX - ''' + str(width2) + '/2, mouseY - ' + str(height2) + '''/2);
+	}
+	</script>
+</head>
+
+<body>
+	<canvas id="pjs"></canvas>
+</body>
+</html>\
+'''
+
+# Save the .html file
+with open("out-page.html", "w") as html:
+    html.write(htmltext)
