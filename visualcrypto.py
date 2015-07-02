@@ -104,15 +104,11 @@ cv2.imwrite('out-reveal2big.png', reveal2big)
 cv2.imwrite('out-hiddenbig.png', hiddenbig)
 
 # Create a demo with Processing.js: since .blend() doesn't work correctly,
-# create transparent versions of both images and show them on white background
-trans1big = np.empty((height2, width2, 4), np.uint8)
-trans2big = np.empty((height2, width2, 4), np.uint8)
-
-# OpenCV doesn't support grayscale .png with transparency, so convert grayscale .png to RGBA
+# create transparent versions of both images and show them on white background.
+# OpenCV doesn't support grayscale .png with transparency, so convert grayscale images to RGBA
 # with white pixels corresponding to transparent
-for i in range(0, 3):
-    trans1big[:, :, i] = reveal1big
-    trans2big[:, :, i] = reveal2big
+trans1big = cv2.cvtColor(reveal1big, cv2.COLOR_GRAY2BGRA)
+trans2big = cv2.cvtColor(reveal2big, cv2.COLOR_GRAY2BGRA)
 trans1big[:, :, 3] = 255 - reveal1big
 trans2big[:, :, 3] = 255 - reveal2big
 
